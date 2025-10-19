@@ -16,7 +16,8 @@ export * from "./mutable.ts";
 export * from "./modifiers.ts";
 
 // dev
-import { $NODE, DevHooks, IS_DEV, isWrappable } from "./store.ts";
+import { $NODE, isWrappable } from "./store.ts";
+import { DevHooks, IS_DEV } from "../constants.ts";
 export const DEV = IS_DEV
   ? ({ $NODE, isWrappable, hooks: DevHooks } as const)
   : undefined;

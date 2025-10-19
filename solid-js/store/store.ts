@@ -3,22 +3,15 @@ import {
   $TRACK,
   batch,
   createSignal,
-  DEV,
   getListener,
-} from "solid-js";
+} from "../core/index.ts";
 
-// replaced during build
-export const IS_DEV = "_SOLID_DEV_" as string | boolean;
+// Production build - dev tools disabled
 
 export const $RAW = Symbol("store-raw"),
   $NODE = Symbol("store-node"),
   $HAS = Symbol("store-has"),
   $SELF = Symbol("store-self");
-
-// debug hooks for devtools
-export const DevHooks: { onStoreNodeUpdate: OnStoreNodeUpdate | null } = {
-  onStoreNodeUpdate: null,
-};
 
 type DataNode = {
   (): any;
@@ -218,12 +211,12 @@ const proxyTraps: ProxyHandler<StoreNode> = {
   },
 
   set() {
-    if (IS_DEV) console.warn("Cannot mutate a Store directly");
+    // Warning disabled in production
     return true;
   },
 
   deleteProperty() {
-    if (IS_DEV) console.warn("Cannot mutate a Store directly");
+    // Warning disabled in production
     return true;
   },
 
@@ -242,10 +235,7 @@ export function setProperty(
   const prev = state[property],
     len = state.length;
 
-  if (IS_DEV) {
-    DevHooks.onStoreNodeUpdate &&
-      DevHooks.onStoreNodeUpdate(state, property, value, prev);
-  }
+  // DevHooks disabled in production
 
   if (value === undefined) {
     delete state[property];
@@ -555,21 +545,9 @@ export function createStore<T extends object = {}>(
 ): [get: Store<T>, set: SetStoreFunction<T>] {
   const unwrappedStore = unwrap((store || {}) as T);
   const isArray = Array.isArray(unwrappedStore);
-  if (
-    IS_DEV && typeof unwrappedStore !== "object" &&
-    typeof unwrappedStore !== "function"
-  ) {
-    throw new Error(
-      `Unexpected type ${typeof unwrappedStore} received when initializing 'createStore'. Expected an object.`,
-    );
-  }
+  // Type checking disabled in production
   const wrappedStore = wrap(unwrappedStore);
-  if (IS_DEV) {
-    DEV!.registerGraph({
-      value: unwrappedStore,
-      name: options && options.name,
-    });
-  }
+  // DEV graph registration disabled in production
   function setStore(...args: any[]): void {
     batch(() => {
       isArray && args.length === 1

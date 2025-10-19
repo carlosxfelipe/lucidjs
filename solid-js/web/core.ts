@@ -1,5 +1,4 @@
-//@ts-nocheck
-import { createMemo } from "solid-js";
+import { createMemo } from "../core/index.ts";
 export {
   createComponent,
   createRenderEffect as effect,
@@ -8,6 +7,6 @@ export {
   mergeProps,
   sharedConfig,
   untrack,
-} from "solid-js";
+} from "../core/index.ts";
 
-export const memo = (fn) => createMemo(() => fn());
+export const memo = <T>(fn: () => T) => createMemo(() => fn());

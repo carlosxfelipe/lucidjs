@@ -1,12 +1,11 @@
-import { ssrElement } from "./server.ts";
 import {
   type ComponentProps,
   type JSX,
   splitProps,
   type ValidComponent,
-} from "solid-js";
+} from "../core/index.ts";
 
-export * from "./server";
+export * from "./server.ts";
 
 export {
   ErrorBoundary,
@@ -19,10 +18,9 @@ export {
   Suspense,
   SuspenseList,
   Switch,
-} from "solid-js";
+} from "../render/index.ts";
 
 export const isServer: boolean = true;
-export const isDev: boolean = false;
 
 export function createDynamic<T extends ValidComponent>(
   component: () => T | undefined,
@@ -32,11 +30,14 @@ export function createDynamic<T extends ValidComponent>(
     t = typeof comp;
 
   if (comp) {
-    if (t === "function") return (comp as Function)(props);
-    else if (t === "string") {
-      return ssrElement(comp as string, props, undefined, true);
+    if (t === "function") {
+      return (comp as (props: ComponentProps<T>) => JSX.Element)(props);
+    } else if (t === "string") {
+      // For server-side rendering of string components
+      return comp as JSX.Element;
     }
   }
+  return null as unknown as JSX.Element;
 }
 
 export type DynamicProps<T extends ValidComponent, P = ComponentProps<T>> =
@@ -55,7 +56,7 @@ export function Dynamic<T extends ValidComponent>(
 }
 
 export function Portal(
-  props: { mount?: Node; useShadow?: boolean; children: JSX.Element },
+  _props: { mount?: Node; useShadow?: boolean; children: JSX.Element },
 ) {
   return "";
 }

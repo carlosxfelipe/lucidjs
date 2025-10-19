@@ -73,12 +73,9 @@ type JSXElement = JSX.Element;
 export type { JSX, JSXElement };
 
 // dev
-import {
-  DevHooks,
-  IS_DEV,
-  registerGraph,
-  writeSignal,
-} from "../reactive/signal.ts";
+import { DevHooks, registerGraph, writeSignal } from "../reactive/signal.ts";
+import { IS_DEV } from "../constants.ts";
+
 export const DEV = IS_DEV
   ? ({ hooks: DevHooks, writeSignal, registerGraph } as const)
   : undefined;

@@ -1,11 +1,11 @@
-import { $PROXY, $TRACK, batch, DEV, getListener } from "solid-js";
+import { $PROXY, $TRACK, batch, getListener } from "../core/index.ts";
+import { IS_DEV } from "../constants.ts";
 import {
   $HAS,
   $NODE,
   $RAW,
   getNode,
   getNodes,
-  IS_DEV,
   isWrappable,
   ownKeys,
   setProperty,
@@ -54,16 +54,20 @@ const proxyTraps: ProxyHandler<StoreNode> = {
       const desc = Object.getOwnPropertyDescriptor(target, property);
       const isFunction = typeof value === "function";
       if (
-        getListener() && (!isFunction || target.hasOwnProperty(property)) &&
+        getListener() &&
+        (!isFunction ||
+          Object.prototype.hasOwnProperty.call(target, property)) &&
         !(desc && desc.get)
       ) {
         value = getNode(nodes, property, value)();
       } else if (
         value != null && isFunction &&
-        value === Array.prototype[property as any]
+        value === Array.prototype[property as keyof Array<unknown>]
       ) {
         return (...args: unknown[]) =>
-          batch(() => Array.prototype[property as any].apply(receiver, args));
+          batch(() =>
+            (value as (...args: unknown[]) => unknown).apply(receiver, args)
+          );
       }
     }
     return isWrappable(value) ? wrap(value) : value;
@@ -149,7 +153,7 @@ function wrap<T extends StoreNode>(value: T): T {
 
 export function createMutable<T extends StoreNode>(
   state: T,
-  options?: { name?: string },
+  _options?: { name?: string },
 ): T {
   const unwrappedStore = unwrap(state || {});
   if (
@@ -162,12 +166,7 @@ export function createMutable<T extends StoreNode>(
   }
 
   const wrappedStore = wrap(unwrappedStore);
-  if (IS_DEV) {
-    DEV!.registerGraph({
-      value: unwrappedStore,
-      name: options && options.name,
-    });
-  }
+  // DEV is disabled in production - no need to register graph
   return wrappedStore;
 }
 

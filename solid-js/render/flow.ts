@@ -4,11 +4,11 @@ import {
   children,
   createMemo,
   createSignal,
-  IS_DEV,
   onCleanup,
   Setter,
   untrack,
 } from "../reactive/signal.ts";
+import { IS_DEV } from "../constants.ts";
 import { indexArray, mapArray } from "../reactive/array.ts";
 import { sharedConfig } from "./hydration.ts";
 import type { JSX } from "../web/jsx.ts";
