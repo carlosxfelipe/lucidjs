@@ -40,7 +40,7 @@ async function main() {
     // Build ESM version (development)
     await buildLibrary({
       input: inputFile,
-      output: `${outputDir}/lucid-js.js`,
+      output: `${outputDir}/lucid.js`,
     });
 
     console.log("✅ Development version built successfully!");
@@ -48,7 +48,7 @@ async function main() {
 
     // Create minified version using Deno's built-in minification
     const minifyCommand = new Deno.Command("deno", {
-      args: ["bundle", "--minify", `${outputDir}/lucid-js.js`],
+      args: ["bundle", "--minify", `${outputDir}/lucid.js`],
       stdout: "piped",
       stderr: "piped",
     });
@@ -57,8 +57,8 @@ async function main() {
 
     if (minifyResult.success) {
       const minifiedCode = new TextDecoder().decode(minifyResult.stdout);
-      await Deno.writeTextFile(`${outputDir}/lucid-js.min.js`, minifiedCode);
-      console.log("✅ Bundle created: ./dist/lucid-js.min.js");
+      await Deno.writeTextFile(`${outputDir}/lucid.min.js`, minifiedCode);
+      console.log("✅ Bundle created: ./dist/lucid.min.js");
     } else {
       const error = new TextDecoder().decode(minifyResult.stderr);
       console.error("❌ Minification failed:", error);
@@ -66,10 +66,10 @@ async function main() {
 
     console.log("\n🎉 All builds completed successfully!");
     console.log("\nGenerated files:");
-    console.log("- dist/lucid-js.js (ESM development)");
-    console.log("- dist/lucid-js.min.js (ESM production)");
+    console.log("- dist/lucid.js (ESM development)");
+    console.log("- dist/lucid.min.js (ESM production)");
     console.log("\nUsage:");
-    console.log('import { createSignal, h, mount } from "./lucid-js.js";');
+    console.log('import { createSignal, h, mount } from "./lucid.js";');
   } catch (error) {
     console.error("Build failed:", error);
     Deno.exit(1);
