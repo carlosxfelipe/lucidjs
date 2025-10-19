@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "es2020",
+      "deno.ns"
+    ],
+    "strict": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
+  },
+  "tasks": {
+    "build": "deno run -A build.ts",
+    "serve": "deno run -A serve.ts"
+  },
+  "imports": {
+    "emit": "https://deno.land/x/emit@0.32.0/mod.ts",
+    "std/": "https://deno.land/std@0.224.0/"
+  }
+}
