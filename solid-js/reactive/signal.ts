@@ -24,9 +24,23 @@ SOFTWARE.
 */
 
 import { requestCallback, Task } from "./scheduler.ts";
-import { setHydrateContext, sharedConfig } from "../render/hydration.ts";
 import type { JSX } from "../web/jsx.ts";
 import type { FlowComponent, FlowProps } from "../render/index.ts";
+
+// Client-only mock for hydration-related functionality
+const sharedConfig = {
+  context: null as any,
+  effects: null as any,
+  done: false,
+  count: 0,
+  load: null as any,
+  has: null as any,
+  getNextContextId: () => "",
+};
+
+function setHydrateContext() {
+  // No-op for client-only build
+}
 
 // replaced during build
 const IS_DEV = "_SOLID_DEV_" as string | boolean;
