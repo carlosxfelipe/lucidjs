@@ -41,7 +41,7 @@ export {
 export {
   createDynamic,
   Dynamic,
-  isDev,
+  // isDev,
   isServer,
   Portal,
 } from "./web/index.ts";

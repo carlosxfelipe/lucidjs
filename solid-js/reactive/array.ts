@@ -3,7 +3,6 @@ import {
   Accessor,
   createRoot,
   createSignal,
-  IS_DEV,
   onCleanup,
   Setter,
   untrack,
@@ -166,9 +165,7 @@ export function mapArray<T, U>(
     function mapper(disposer: () => void) {
       disposers[j] = disposer;
       if (indexes) {
-        const [s, set] = IS_DEV
-          ? createSignal(j, { name: "index" })
-          : createSignal(j);
+        const [s, set] = createSignal(j);
         indexes[j] = set;
         return mapFn(newItems[j], s);
       }
@@ -245,9 +242,7 @@ export function indexArray<T, U>(
     });
     function mapper(disposer: () => void) {
       disposers[i] = disposer;
-      const [s, set] = IS_DEV
-        ? createSignal(newItems[i], { name: "value" })
-        : createSignal(newItems[i]);
+      const [s, set] = createSignal(newItems[i]);
       signals[i] = set;
       return mapFn(s, i);
     }

@@ -8,15 +8,11 @@ import {
   Setter,
   untrack,
 } from "../reactive/signal.ts";
-import { IS_DEV } from "../constants.ts";
 import { indexArray, mapArray } from "../reactive/array.ts";
 import { sharedConfig } from "./hydration.ts";
 import type { JSX } from "../web/jsx.ts";
 
-const narrowedError = (name: string) =>
-  IS_DEV
-    ? `Attempting to access a stale value from <${name}> that could possibly be undefined. This may occur because you are reading the accessor returned from the component at a time where it has already been unmounted. We recommend cleaning up any stale timers or async, or reading from the initial condition.`
-    : `Stale read from <${name}>.`;
+const narrowedError = (name: string) => `Stale read from <${name}>.`;
 
 /**
  * Creates a list elements from a list
@@ -37,15 +33,9 @@ export function For<T extends readonly any[], U extends JSX.Element>(props: {
   children: (item: T[number], index: Accessor<number>) => U;
 }) {
   const fallback = "fallback" in props && { fallback: () => props.fallback };
-  return (IS_DEV
-    ? createMemo(
-      mapArray(() => props.each, props.children, fallback || undefined),
-      undefined,
-      { name: "value" },
-    )
-    : createMemo(
-      mapArray(() => props.each, props.children, fallback || undefined),
-    )) as unknown as JSX.Element;
+  return createMemo(
+    mapArray(() => props.each, props.children, fallback || undefined),
+  ) as unknown as JSX.Element;
 }
 
 /**
@@ -67,15 +57,9 @@ export function Index<T extends readonly any[], U extends JSX.Element>(props: {
   children: (item: Accessor<T[number]>, index: number) => U;
 }) {
   const fallback = "fallback" in props && { fallback: () => props.fallback };
-  return (IS_DEV
-    ? createMemo(
-      indexArray(() => props.each, props.children, fallback || undefined),
-      undefined,
-      { name: "value" },
-    )
-    : createMemo(
-      indexArray(() => props.each, props.children, fallback || undefined),
-    )) as unknown as JSX.Element;
+  return createMemo(
+    indexArray(() => props.each, props.children, fallback || undefined),
+  ) as unknown as JSX.Element;
 }
 
 type RequiredParameter<T> = T extends () => unknown ? never : T;
@@ -113,17 +97,12 @@ export function Show<T>(props: {
   const conditionValue = createMemo<T | undefined | null | boolean>(
     () => props.when,
     undefined,
-    IS_DEV ? { name: "condition value" } : undefined,
+    undefined,
   );
   const condition = keyed ? conditionValue : createMemo(
     conditionValue,
     undefined,
-    IS_DEV
-      ? {
-        equals: (a, b) => !a === !b,
-        name: "condition",
-      }
-      : { equals: (a, b) => !a === !b },
+    { equals: (a, b) => !a === !b },
   );
   return createMemo(
     () => {
@@ -145,7 +124,7 @@ export function Show<T>(props: {
       return props.fallback;
     },
     undefined,
-    IS_DEV ? { name: "value" } : undefined,
+    undefined,
   ) as unknown as JSX.Element;
 }
 
@@ -180,17 +159,12 @@ export function Switch(
       const conditionValue = createMemo(
         () => (prevFunc() ? undefined : mp.when),
         undefined,
-        IS_DEV ? { name: "condition value" } : undefined,
+        undefined,
       );
       const condition = mp.keyed ? conditionValue : createMemo(
         conditionValue,
         undefined,
-        IS_DEV
-          ? {
-            equals: (a, b) => !a === !b,
-            name: "condition",
-          }
-          : { equals: (a, b) => !a === !b },
+        { equals: (a, b) => !a === !b },
       );
       func = () =>
         prevFunc() || (condition() ? [index, conditionValue, mp] : undefined);
@@ -218,7 +192,7 @@ export function Switch(
         : child;
     },
     undefined,
-    IS_DEV ? { name: "eval conditions" } : undefined,
+    undefined,
   ) as unknown as JSX.Element;
 }
 
@@ -287,7 +261,7 @@ export function ErrorBoundary(props: {
   }
   const [errored, setErrored] = createSignal<any>(
     err,
-    IS_DEV ? { name: "errored" } : undefined,
+    undefined,
   );
   Errors || (Errors = new Set());
   Errors.add(setErrored);
@@ -297,9 +271,7 @@ export function ErrorBoundary(props: {
       let e: any;
       if ((e = errored())) {
         const f = props.fallback;
-        if (IS_DEV && (typeof f !== "function" || f.length == 0)) {
-          console.error(e);
-        }
+
         return typeof f === "function" && f.length
           ? untrack(() => f(e, () => setErrored()))
           : f;
@@ -307,6 +279,6 @@ export function ErrorBoundary(props: {
       return catchError(() => props.children, setErrored);
     },
     undefined,
-    IS_DEV ? { name: "value" } : undefined,
+    undefined,
   ) as unknown as JSX.Element;
 }

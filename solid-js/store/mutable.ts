@@ -1,5 +1,4 @@
 import { $PROXY, $TRACK, batch, getListener } from "../core/index.ts";
-import { IS_DEV } from "../constants.ts";
 import {
   $HAS,
   $NODE,
@@ -156,14 +155,6 @@ export function createMutable<T extends StoreNode>(
   _options?: { name?: string },
 ): T {
   const unwrappedStore = unwrap(state || {});
-  if (
-    IS_DEV && typeof unwrappedStore !== "object" &&
-    typeof unwrappedStore !== "function"
-  ) {
-    throw new Error(
-      `Unexpected type ${typeof unwrappedStore} received when initializing 'createMutable'. Expected an object.`,
-    );
-  }
 
   const wrappedStore = wrap(unwrappedStore);
   // DEV is disabled in production - no need to register graph

@@ -29,7 +29,7 @@ import type { JSX } from "../web/jsx.ts";
 import type { FlowComponent, FlowProps } from "../render/index.ts";
 
 // replaced during build
-export const IS_DEV = "_SOLID_DEV_" as string | boolean;
+const IS_DEV = "_SOLID_DEV_" as string | boolean;
 
 export const equalFn = <T>(a: T, b: T) => a === b;
 export const $PROXY = Symbol("solid-proxy");

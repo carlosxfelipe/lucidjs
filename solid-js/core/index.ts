@@ -71,25 +71,3 @@ export * from "../render/index.ts";
 import type { JSX } from "../web/jsx.ts";
 type JSXElement = JSX.Element;
 export type { JSX, JSXElement };
-
-// dev
-import { DevHooks, registerGraph, writeSignal } from "../reactive/signal.ts";
-import { IS_DEV } from "../constants.ts";
-
-export const DEV = IS_DEV
-  ? ({ hooks: DevHooks, writeSignal, registerGraph } as const)
-  : undefined;
-
-// handle multiple instance check
-declare global {
-  var Solid$$: boolean;
-}
-
-if (IS_DEV && globalThis) {
-  if (!globalThis.Solid$$) globalThis.Solid$$ = true;
-  else {
-    console.warn(
-      "You appear to have multiple instances of Solid. This can lead to unexpected behavior.",
-    );
-  }
-}

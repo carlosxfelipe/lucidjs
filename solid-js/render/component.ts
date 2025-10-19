@@ -1,12 +1,9 @@
 import {
-  $DEVCOMP,
   $PROXY,
   createMemo,
   createResource,
   createSignal,
-  devComponent,
   EffectFunction,
-  IS_DEV,
   SUPPORTS_PROXY,
   untrack,
 } from "../reactive/signal.ts";
@@ -121,14 +118,11 @@ export function createComponent<T extends Record<string, any>>(
     if (sharedConfig.context) {
       const c = sharedConfig.context;
       setHydrateContext(nextHydrateContext());
-      const r = IS_DEV
-        ? devComponent(Comp, props || ({} as T))
-        : untrack(() => Comp(props || ({} as T)));
+      const r = untrack(() => Comp(props || ({} as T)));
       setHydrateContext(c);
       return r;
     }
   }
-  if (IS_DEV) return devComponent(Comp, props || ({} as T));
   return untrack(() => Comp(props || ({} as T)));
 }
 
@@ -407,7 +401,6 @@ export function lazy<T extends Component<any>>(
     return createMemo(() =>
       (Comp = comp())
         ? untrack(() => {
-          if (IS_DEV) Object.assign(Comp!, { [$DEVCOMP]: true });
           if (!ctx || sharedConfig.done) return Comp!(props);
           const c = sharedConfig.context;
           setHydrateContext(ctx);
