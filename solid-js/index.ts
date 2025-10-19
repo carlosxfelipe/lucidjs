@@ -1,43 +1,50 @@
 /**
- * SolidJS TypeScript Source - Index
+ * SolidJS TypeScript Source - Main Entry Point
  *
- * Esta pasta contém todos os arquivos TypeScript fonte do SolidJS organizados
- * em uma estrutura limpa para facilitar navegação e estudo.
+ * This file exports all SolidJS functionality from the organized subfolders.
+ * Structure based on the original SolidJS source code.
  *
- * Estrutura:
- * - core/       - Exportações principais do SolidJS (src/index.ts)
- * - reactive/   - Sistema de reatividade (signals, array, observable, scheduler)
- * - render/     - Sistema de renderização (components, Suspense, flow, hydration)
- * - server/     - Renderização no servidor (SSR)
- * - store/      - Sistema de gerenciamento de estado
- * - web/        - Funcionalidades específicas do navegador
- *
- * Arquivos principais para estudo:
- * - reactive/signal.ts - Coração do SolidJS (1809 linhas!)
- * - render/component.ts - Lógica de componentes
- * - store/store.ts - Sistema de estado reativo
- * - web/client.ts - Funcionalidades do navegador
- *
- * Nota: Os arquivos mantêm imports originais, esta estrutura é apenas para referência.
+ * Priority: Core > Store > Web (Server and Reactive are already included in Core)
  */
 
-// Este arquivo serve apenas como documentação da estrutura
-// Para usar os arquivos, navegue diretamente nas pastas correspondentes
+// Core functionality (includes reactive and render systems)
+export * from "./core/index.ts";
 
-console.log(`
-🎯 SolidJS TypeScript Source Explorer
+// Store management (additional functionality)
+export { $RAW, createStore, unwrap } from "./store/index.ts";
 
-📁 Pastas disponíveis:
-   core/      - Entry point principal
-   reactive/  - Sistema de reatividade
-   render/    - Sistema de renderização  
-   server/    - SSR e renderização servidor
-   store/     - Gerenciamento de estado
-   web/       - Funcionalidades web
+// Additional store utilities
+export { produce, reconcile } from "./store/modifiers.ts";
 
-🔍 Arquivos chave para estudar:
-   reactive/signal.ts    - O coração do SolidJS!
-   render/component.ts   - Como componentes funcionam
-   store/store.ts        - Sistema de estado reativo
-   web/jsx.ts           - Runtime JSX
-`);
+export type {
+  ArrayFilterFn,
+  DeepMutable,
+  DeepReadonly,
+  NotWrappable,
+  Part,
+  SetStoreFunction,
+  SolidStore,
+  Store,
+  StoreNode,
+  StorePathRange,
+  StoreSetter,
+} from "./store/index.ts";
+
+// Re-export key server functions that don't conflict
+export {
+  createUniqueId,
+  enableHydration,
+  resetErrorBoundaries,
+} from "./server/index.ts";
+
+// Re-export web-specific functions that don't conflict
+export {
+  createDynamic,
+  Dynamic,
+  isDev,
+  isServer,
+  Portal,
+} from "./web/index.ts";
+
+// Export types that might be useful
+export type { DynamicProps } from "./web/index.ts";
