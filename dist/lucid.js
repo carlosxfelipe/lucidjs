@@ -36,9 +36,19 @@ function batch(f) {
         flush();
     }
 }
-function createSignal(initial) {
+function createSignal(initial, options) {
+    let value = initial;
+    const key = options?.key;
+    const serialize = options?.serialize ?? JSON.stringify;
+    const deserialize = options?.deserialize ?? ((s)=>JSON.parse(s));
+    if (key) {
+        try {
+            const stored = localStorage.getItem(key);
+            if (stored !== null) value = deserialize(stored);
+        } catch  {}
+    }
     const s = {
-        value: initial,
+        value,
         subs: new Set(),
         get () {
             if (CURRENT) {
@@ -51,6 +61,11 @@ function createSignal(initial) {
             const v = typeof next === "function" ? next(s.value) : next;
             if (Object.is(v, s.value)) return;
             s.value = v;
+            if (key) {
+                try {
+                    localStorage.setItem(key, serialize(v));
+                } catch  {}
+            }
             for (const sub of s.subs)PENDING.add(sub);
             flush();
         }
@@ -58,6 +73,23 @@ function createSignal(initial) {
     return [
         ()=>s.get(),
         (v)=>s.set(v)
+    ];
+}
+function createStorageSignal(key, initial) {
+    let value = initial;
+    try {
+        const stored = localStorage.getItem(key);
+        if (stored !== null) value = JSON.parse(stored);
+    } catch  {}
+    const [get, set] = createSignal(value);
+    return [
+        get,
+        (v)=>{
+            set(v);
+            try {
+                localStorage.setItem(key, JSON.stringify(get()));
+            } catch  {}
+        }
     ];
 }
 function createMemo(calc) {
@@ -443,6 +475,7 @@ function mount(node, container) {
 }
 export { batch as batch };
 export { createSignal as createSignal };
+export { createStorageSignal as createStorageSignal };
 export { createMemo as createMemo };
 export { createEffect as createEffect };
 export { onCleanup as onCleanup };
