@@ -64,27 +64,13 @@ export function batch<T>(f: () => T): T {
 export function createSignal<T>(
   initial: T,
   options?: {
-    key?: string;
-    serialize?: (v: T) => string;
-    deserialize?: (s: string) => T;
+    equals?: (prev: T, next: T) => boolean;
   },
 ): [() => T, (v: T | ((p: T) => T)) => void] {
-  let value = initial;
-  const key = options?.key;
-  const serialize = options?.serialize ?? JSON.stringify;
-  const deserialize = options?.deserialize ??
-    ((s: string) => JSON.parse(s) as T);
-
-  // If a key is provided, try to restore value from localStorage
-  if (key) {
-    try {
-      const stored = localStorage.getItem(key);
-      if (stored !== null) value = deserialize(stored);
-    } catch { /* ignore deserialization errors */ }
-  }
+  const equals = options?.equals ?? Object.is;
 
   const s: Signal<T> = {
-    value,
+    value: initial,
     subs: new Set(),
     get() {
       if (CURRENT) {
@@ -97,40 +83,47 @@ export function createSignal<T>(
       const v = typeof next === "function"
         ? (next as (p: T) => T)(s.value)
         : next;
-      if (Object.is(v, s.value)) return;
+
+      if (equals(s.value, v)) return;
+
       s.value = v;
-      if (key) {
-        try {
-          localStorage.setItem(key, serialize(v));
-        } catch { /* ignore serialization errors */ }
-      }
       for (const sub of s.subs) PENDING.add(sub);
       flush();
     },
   };
+
   return [() => s.get(), (v) => s.set(v)];
 }
 
-// Persistent signal helper (SolidJS-like API)
 export function createStorageSignal<T>(
   key: string,
   initial: T,
+  opts?: {
+    serialize?: (v: T) => string;
+    deserialize?: (s: string) => T;
+  },
 ): [() => T, (v: T | ((p: T) => T)) => void] {
+  const serialize = opts?.serialize ?? JSON.stringify;
+  const deserialize = opts?.deserialize ?? ((s: string) => JSON.parse(s) as T);
+
   let value = initial;
   try {
     const stored = localStorage.getItem(key);
-    if (stored !== null) value = JSON.parse(stored);
-    // deno-lint-ignore no-empty
-  } catch {}
+    if (stored !== null) value = deserialize(stored);
+  } catch {
+    // ignore
+  }
+
   const [get, set] = createSignal<T>(value);
   return [
     get,
     (v) => {
       set(v);
       try {
-        localStorage.setItem(key, JSON.stringify(get()));
-        // deno-lint-ignore no-empty
-      } catch {}
+        localStorage.setItem(key, serialize(get()));
+      } catch {
+        // ignore
+      }
     },
   ];
 }

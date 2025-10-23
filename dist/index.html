@@ -5,13 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Contador Persistente com Lucid.js</title>
     <style>
-      body { font-family: system-ui, sans-serif; margin: 0; padding: 16px; }
-      .container { max-width: 600px; margin: 0 auto; }
-      h1, h2 { text-align: center; }
-      button { margin: 4px; padding: 8px 12px; cursor: pointer; }
-      .tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; }
-      .tag { padding: 2px 6px; border: 1px solid #ccc; border-radius: 4px; }
-      .muted { color: #666; text-align: center; }
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0;
+        padding: 16px;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      h1, h2 {
+        text-align: center;
+      }
+      button {
+        margin: 4px;
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+      .tags {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+      .tag {
+        padding: 2px 6px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      .muted {
+        color: #666;
+        text-align: center;
+      }
     </style>
   </head>
 
@@ -22,38 +47,59 @@
     </main>
 
     <script type="module">
-      import * as Lucid from 'https://cdn.jsdelivr.net/gh/carlosxfelipe/lucidjs@main/dist/lucid.min.js';
-      const { h, mount, createSignal, createMemo, createStore, Show, For, batch } = Lucid;
+      import * as Lucid from "https://cdn.jsdelivr.net/gh/carlosxfelipe/lucidjs@main/dist/lucid.min.js";
+      const {
+        h,
+        mount,
+        createSignal,
+        createMemo,
+        createStore,
+        Show,
+        For,
+        batch,
+      } = Lucid;
 
       const App = () => {
         // Criando store com persistência no localStorage
         const store = createStore(
           (set, get) => ({
-            count: 0
+            count: 0,
           }),
           {
-            name: 'counter-app',
+            name: "counter-app",
             persist: true,
-            version: 1
-          }
+            version: 1,
+          },
         );
 
         // Usando select para criar um signal reativo do count
-        const count = store.select(state => state.count);
+        const count = store.select((state) => state.count);
         const doubled = createMemo(() => count() * 2);
 
         // Funções para atualizar o store
-        const increment = () => store.setState(state => ({ count: state.count + 1 }));
-        const decrement = () => store.setState(state => ({ count: Math.max(0, state.count - 1) }));
+        const increment = () =>
+          store.setState((state) => ({ count: state.count + 1 }));
+        const decrement = () =>
+          store.setState((state) => ({
+            count: Math.max(0, state.count - 1),
+          }));
         const reset = () => store.setState({ count: 0 });
-        const plusTwo = () => batch(() => { increment(); increment(); });
+        const plusTwo = () =>
+          batch(() => {
+            increment();
+            increment();
+          });
 
         return h(
           "article",
           null,
           h("header", null, h("h2", null, "Demonstração do Store")),
           h("p", null, "Valor: ", count, " • Dobro: ", doubled),
-          h("p", { class: "muted", style: "font-size: 0.8em;" }, "💾 O valor é salvo automaticamente e restaurado ao recarregar a página"),
+          h(
+            "p",
+            { class: "muted", style: "font-size: 0.8em;" },
+            "💾 O valor é salvo automaticamente e restaurado ao recarregar a página",
+          ),
           h(
             "div",
             null,
@@ -64,7 +110,12 @@
           ),
           Show({
             when: () => count() > 0,
-            children: h("p", { class: "muted" }, "Listando itens de 0 até ", count),
+            children: h(
+              "p",
+              { class: "muted" },
+              "Listando itens de 0 até ",
+              count,
+            ),
           }),
           h(
             "div",
