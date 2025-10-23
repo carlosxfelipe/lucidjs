@@ -37,18 +37,9 @@ function batch(f) {
     }
 }
 function createSignal(initial, options) {
-    let value = initial;
-    const key = options?.key;
-    const serialize = options?.serialize ?? JSON.stringify;
-    const deserialize = options?.deserialize ?? ((s)=>JSON.parse(s));
-    if (key) {
-        try {
-            const stored = localStorage.getItem(key);
-            if (stored !== null) value = deserialize(stored);
-        } catch  {}
-    }
+    const equals = options?.equals ?? Object.is;
     const s = {
-        value,
+        value: initial,
         subs: new Set(),
         get () {
             if (CURRENT) {
@@ -59,13 +50,8 @@ function createSignal(initial, options) {
         },
         set (next) {
             const v = typeof next === "function" ? next(s.value) : next;
-            if (Object.is(v, s.value)) return;
+            if (equals(s.value, v)) return;
             s.value = v;
-            if (key) {
-                try {
-                    localStorage.setItem(key, serialize(v));
-                } catch  {}
-            }
             for (const sub of s.subs)PENDING.add(sub);
             flush();
         }
@@ -75,11 +61,13 @@ function createSignal(initial, options) {
         (v)=>s.set(v)
     ];
 }
-function createStorageSignal(key, initial) {
+function createStorageSignal(key, initial, opts) {
+    const serialize = opts?.serialize ?? JSON.stringify;
+    const deserialize = opts?.deserialize ?? ((s)=>JSON.parse(s));
     let value = initial;
     try {
         const stored = localStorage.getItem(key);
-        if (stored !== null) value = JSON.parse(stored);
+        if (stored !== null) value = deserialize(stored);
     } catch  {}
     const [get, set] = createSignal(value);
     return [
@@ -87,7 +75,7 @@ function createStorageSignal(key, initial) {
         (v)=>{
             set(v);
             try {
-                localStorage.setItem(key, JSON.stringify(get()));
+                localStorage.setItem(key, serialize(get()));
             } catch  {}
         }
     ];
